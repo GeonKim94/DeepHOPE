@@ -1,0 +1,149 @@
+% dir_train = '/data02/gkim/stem_cell_jwshin/data/230209_3D/train';
+% dir_test = '/data02/gkim/stem_cell_jwshin/data/230209_3D/test';
+% dir_val = '/data02/gkim/stem_cell_jwshin/data/230209_3D/val';
+
+dir_train = '/data02/gkim/stem_cell_jwshin/data/230306_3D_curated/train';
+dir_test = '/data02/gkim/stem_cell_jwshin/data/230306_3D_curated/test';
+dir_val = '/data02/gkim/stem_cell_jwshin/data/230306_3D_curated/val';
+% train was 00_train but changed manually
+% colony folders were rearranged to quality folders manually
+%% split test imgs (different line)
+cd(dir_train)
+dir_cls = dir('0*');
+for iter_cls = 1:length(dir_cls)
+    cd(dir_train)
+    cd(dir_cls(iter_cls).name)
+
+    dir_mat = dir('*.mat');
+    idxs_line = {};
+    for iter_mat = 1:length(dir_mat)
+        fname = dir_mat(iter_mat).name;
+        coor_dot = strfind(fname,'.');
+        coor_dot = coor_dot(1);
+        idx_line = fname(1:coor_dot-1);
+        coor_uh = strfind(idx_line,'_');
+        if ~isempty(coor_uh)
+            coor_uh = coor_uh(1);
+            idx_line = idx_line(1:coor_uh-1);
+        end
+        idxs_line{end+1} = idx_line;
+    end
+
+    idxs_line_ = unique(idxs_line);
+    nums_line = [];
+    for iter_line = 1:length(idxs_line_)
+        idx_line = idxs_line_{iter_line};
+        nums_line(iter_line) = length(find(strcmp(idxs_line,idx_line)));
+    end
+
+    idx_line_test = idxs_line_{find(nums_line == min(nums_line))};
+    
+    mkdir([dir_test '/' dir_cls(iter_cls).name]);
+    for iter_mat = 1:length(dir_mat)
+        fname = dir_mat(iter_mat).name;
+        if contains(fname(1:3), idx_line_test)
+            movefile([dir_train '/' dir_cls(iter_cls).name '/' fname],...
+                [dir_test '/' dir_cls(iter_cls).name '/' fname])
+        end
+    end
+
+end
+
+%% split val imgs (same line, different colony)
+cd(dir_train)
+dir_cls = dir('0*');
+for iter_cls = 1:length(dir_cls)
+    cd(dir_train)
+    cd(dir_cls(iter_cls).name)
+
+    dir_mat = dir('*.mat');
+    idxs_line = {};
+    for iter_mat = 1:length(dir_mat)
+        fname = dir_mat(iter_mat).name;
+        coor_dot = strfind(fname,'.');
+        coor_dot = coor_dot(1);
+        idx_line = fname(1:coor_dot-1);
+        coor_uh = strfind(idx_line,'_');
+        if ~isempty(coor_uh)
+            coor_uh = coor_uh(1);
+            idx_line = idx_line(1:coor_uh-1);
+        end
+        idxs_line{end+1} = idx_line;
+    end
+
+    idxs_line_ = unique(idxs_line);
+        
+
+    mkdir([dir_val '/' dir_cls(iter_cls).name])
+    for iter_line = 1:length(idxs_line_)
+
+        idxs_colony = {};
+        idx_line = idxs_line_{iter_line};
+        idxs_colony = {};
+        dir_mat = dir([idx_line '*']);
+        
+        for iter_mat = 1:length(dir_mat)
+            fname = dir_mat(iter_mat).name;
+            coor_dot = strfind(fname,'.');
+            coor_dot = coor_dot(1);
+            coor_uh = strfind(fname,'_');
+            coor_uh = coor_uh(1);
+            if coor_uh < coor_dot
+                idx_colony = fname(coor_uh+1:coor_dot+3);
+            else
+                idx_colony = fname(coor_dot+1:coor_dot+3);
+            end
+            idxs_colony{end+1} = idx_colony;
+        end
+        
+        idxs_colony_ = unique(idxs_colony);
+        
+        idxs_colony_val = ...
+        idxs_colony_(randperm(length(idxs_colony_),round(length(idxs_colony_)/10)));
+
+        for iter_colony = 1:length(idxs_colony_val)
+            dir_mat = dir([idx_line '*' idxs_colony_val{iter_colony} '*']);
+
+            for iter_mat = 1:length(dir_mat)
+                fname = dir_mat(iter_mat).name;
+                movefile([dir_train '/' dir_cls(iter_cls).name '/' fname],...
+                [dir_val '/' dir_cls(iter_cls).name '/' fname])
+            end
+        end
+        
+    end
+
+end
+%% unsplit
+
+cd(dir_train)
+dir_cls = dir('0*');
+for iter_cls = 1:length(dir_cls)
+    cd(dir_test)
+    cd(dir_cls(iter_cls).name)
+
+    dir_mat = dir('*.mat');
+    idxs_line = {};
+    idxs_colony = {};
+    for iter_mat = 1:length(dir_mat)
+        fname = dir_mat(iter_mat).name;
+        movefile([dir_test '/' dir_cls(iter_cls).name '/' fname],...
+            [dir_train '/' dir_cls(iter_cls).name '/' fname])
+    end
+end
+
+cd(dir_train)
+dir_cls = dir('0*');
+for iter_cls = 1:length(dir_cls)
+    cd(dir_val)
+    cd(dir_cls(iter_cls).name)
+
+    dir_mat = dir('*.mat');
+    idxs_line = {};
+    idxs_colony = {};
+    for iter_mat = 1:length(dir_mat)
+        fname = dir_mat(iter_mat).name;
+        movefile([dir_val '/' dir_cls(iter_cls).name '/' fname],...
+            [dir_train '/' dir_cls(iter_cls).name '/' fname])
+    end
+end

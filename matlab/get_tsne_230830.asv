@@ -1,0 +1,380 @@
+load('/data02/gkim/stem_cell_jwshin/outs/230502_MIPH5_wider_allh_b002_in_lr0.001/epoch[00211]_train[0.9651]_valid[0.9444]_test[0.9074]/result_test.mat')
+targets_cltest = single(targets);
+test_wholesize_cltest = length(paths);
+scores_test_cltest = reshape(scores, [length(scores)/(test_wholesize_cltest), test_wholesize_cltest])';
+feats = cell2mat(feats)';
+feats_test_cltest = reshape(feats, [length(feats)/(test_wholesize_cltest), test_wholesize_cltest])';
+paths_test_cltest = paths';
+targets_test_cltest = single(targets_cltest');
+preds_test_cltest = -ones(size(targets_test_cltest));
+
+lines_test_cltest = zeros(size(targets_test_cltest));
+for iter_data = 1:length(targets_test_cltest)
+    fname = paths_test_cltest{iter_data};
+    idx_slash = strfind(fname,'/');
+    fname = fname(idx_slash(end)+1:end);
+    if contains(fname, 'GM') || contains(fname, 'gm') || contains(fname, '230719.')  || contains(fname, '230720.') 
+        lines_test_cltest(iter_data) = 1;
+    elseif contains(fname, 'H9') || contains(fname, 'h9') || contains(fname, '230714.') 
+        lines_test_cltest(iter_data) = 2;
+    elseif contains(fname, 'JAX') || contains(fname, 'Jax') || contains(fname, '230713.') 
+        lines_test_cltest(iter_data) = 3;
+    else
+        error('No line found')
+    end
+end
+targets_test_h_cltest = zeros(size(targets_test_cltest));
+for iter_data = 1:length(targets_test_cltest)
+    fname = paths_test_cltest{iter_data};
+    idx_slash = strfind(fname,'/');
+    fname = fname(idx_slash(end)+1:end);
+    if contains(fname, '24h') || contains(fname, '24H')
+        targets_test_h_cltest(iter_data) = -1;
+    elseif contains(fname, '12h') || contains(fname, '12H')
+        targets_test_h_cltest(iter_data) = 0;
+    elseif contains(fname, 'untreated') || contains(fname, 'Untreated') || contains(fname, 'UNTREATED')
+        targets_test_h_cltest(iter_data) = 1;
+    else
+        error('No hour found')
+    end
+end
+
+
+load('/data02/gkim/stem_cell_jwshin/outs/230502_MIPH5_wider_allh_b002_in_lr0.001/epoch[00211]_train[0.9651]_valid[0.9444]_test[0.9074]/result_valid.mat')
+targets_clvalid = single(targets);
+test_wholesize_clvalid = length(paths);
+scores_test_clvalid = reshape(scores, [length(scores)/(test_wholesize_clvalid), test_wholesize_clvalid])';
+feats = cell2mat(feats)';
+feats_test_clvalid = reshape(feats, [length(feats)/(test_wholesize_clvalid), test_wholesize_clvalid])';
+paths_test_clvalid = paths';
+targets_test_clvalid = single(targets_clvalid');
+preds_test_clvalid = -ones(size(targets_test_clvalid));
+lines_test_clvalid = zeros(size(targets_test_clvalid));
+for iter_data = 1:length(targets_test_clvalid)
+    fname = paths_test_clvalid{iter_data};
+    idx_slash = strfind(fname,'/');
+    fname = fname(idx_slash(end)+1:end);
+    if contains(fname, 'GM') || contains(fname, 'gm') || contains(fname, '230719.')  || contains(fname, '230720.') 
+        lines_test_clvalid(iter_data) = 1;
+    elseif contains(fname, 'H9') || contains(fname, 'h9') || contains(fname, '230714.') 
+        lines_test_clvalid(iter_data) = 2;
+    elseif contains(fname, 'JAX') || contains(fname, 'Jax') || contains(fname, '230713.') 
+        lines_test_clvalid(iter_data) = 3;
+    else
+        error('No line found')
+    end
+end
+targets_test_h_clvalid = zeros(size(targets_test_clvalid));
+for iter_data = 1:length(targets_test_clvalid)
+    fname = paths_test_clvalid{iter_data};
+    idx_slash = strfind(fname,'/');
+    fname = fname(idx_slash(end)+1:end);
+    if contains(fname, '24h') || contains(fname, '24H')
+        targets_test_h_clvalid(iter_data) = -1;
+    elseif contains(fname, '12h') || contains(fname, '12H')
+        targets_test_h_clvalid(iter_data) = 0;
+    elseif contains(fname, 'untreated') || contains(fname, 'Untreated') || contains(fname, 'UNTREATED')
+        targets_test_h_clvalid(iter_data) = 1;
+    else
+        error('No hour found')
+    end
+end
+
+load('/data02/gkim/stem_cell_jwshin/outs/230502_MIPH5_wider_allh_b002_in_lr0.001/epoch[00211]_train[0.9651]_valid[0.9444]_test[0.9074]/result_train.mat')
+targets_cltrain = single(targets);
+test_wholesize_cltrain = length(paths);
+scores_test_cltrain = reshape(scores, [length(scores)/(test_wholesize_cltrain), test_wholesize_cltrain])';
+feats = cell2mat(feats)';
+feats_test_cltrain = reshape(feats, [length(feats)/(test_wholesize_cltrain), test_wholesize_cltrain])';
+paths_test_cltrain = paths';
+targets_test_cltrain = single(targets_cltrain');
+preds_test_cltrain = -ones(size(targets_test_cltrain));
+lines_test_cltrain = zeros(size(targets_test_cltrain));
+for iter_data = 1:length(targets_test_cltrain)
+    fname = paths_test_cltrain{iter_data};
+    idx_slash = strfind(fname,'/');
+    fname = fname(idx_slash(end)+1:end);
+    if contains(fname, 'GM') || contains(fname, 'gm') || contains(fname, '230719.')  || contains(fname, '230720.') 
+        lines_test_cltrain(iter_data) = 1;
+    elseif contains(fname, 'H9') || contains(fname, 'h9') || contains(fname, '230714.') 
+        lines_test_cltrain(iter_data) = 2;
+    elseif contains(fname, 'JAX') || contains(fname, 'Jax') || contains(fname, '230713.') 
+        lines_test_cltrain(iter_data) = 3;
+    else
+        error('No line found')
+    end
+end
+
+targets_test_h_cltrain = zeros(size(targets_test_cltrain));
+for iter_data = 1:length(targets_test_cltrain)
+    fname = paths_test_cltrain{iter_data};
+    idx_slash = strfind(fname,'/');
+    fname = fname(idx_slash(end)+1:end);
+    if contains(fname, '24h') || contains(fname, '24H')
+        targets_test_h_cltrain(iter_data) = -1;
+    elseif contains(fname, '12h') || contains(fname, '12H')
+        targets_test_h_cltrain(iter_data) = 0;
+    elseif contains(fname, 'untreated') || contains(fname, 'Untreated') || contains(fname, 'UNTREATED')
+        targets_test_h_cltrain(iter_data) = 1;
+    else
+        error('No hour found')
+    end
+end
+
+load('/data02/gkim/stem_cell_jwshin/outs/230502_MIPH5_wider_allh_b002_in_lr0.001_testPD/epoch[00211]_train[1.0000]_valid[1.0000]_test[0.5449]/result_test.mat')
+targets_pdtest = single(targets);
+test_wholesize_pdtest = length(paths);
+scores_test_pdtest = reshape(scores, [length(scores)/(test_wholesize_pdtest), test_wholesize_pdtest])';
+feats = cell2mat(feats)';
+feats_test_pdtest = reshape(feats, [length(feats)/(test_wholesize_pdtest), test_wholesize_pdtest])';
+paths_test_pdtest = paths';
+targets_test_pdtest = single(targets_pdtest');
+preds_test_pdtest = -ones(size(targets_test_pdtest));
+
+lines_test_pdtest = zeros(size(targets_test_pdtest));
+for iter_data = 1:length(targets_test_pdtest)
+    fname = paths_test_pdtest{iter_data};
+    idx_slash = strfind(fname,'/');
+    fname = fname(idx_slash(end)+1:end);
+    if contains(fname, '.A20.') || contains(fname, 'A20_')
+        lines_test_pdtest(iter_data) = 100;
+    elseif contains(fname, '.A19.') || contains(fname, 'A19_')
+        lines_test_pdtest(iter_data) = 200;
+    elseif contains(fname, '.A15.') || contains(fname, 'A15_')
+        continue%lines_test(iter_data) = 3;
+
+    elseif contains(fname, '.E5.') || contains(fname, 'E5_')
+        continue%lines_test(iter_data) = 4;
+    elseif contains(fname, '.E3.') || contains(fname, 'E3_')
+        continue%lines_test(iter_data) = 5;
+
+    elseif contains(fname, '.A4.') || contains(fname, 'A4_')
+        continue%lines_test(iter_data) = 6;
+    elseif contains(fname, '.A2.') || contains(fname, 'A2_')
+        lines_test_pdtest(iter_data) = 300;%7;
+    elseif contains(fname, '.A12.') || contains(fname, 'A12_')
+        lines_test_pdtest(iter_data) = 400;%8;
+    else
+        error('No line found')
+    end
+end
+
+% targets_test_h = zeros(size(targets_test));
+% for iter_data = 1:length(targets_test)
+%     fname = paths_test{iter_data};
+%     idx_slash = strfind(fname,'/');
+%     fname = fname(idx_slash(end)+1:end);
+%     if contains(fname, '24h') || contains(fname, '24H')
+%         targets_test_h(iter_data) = -1;
+%     elseif contains(fname, '12h') || contains(fname, '12H')
+%         targets_test_h(iter_data) = 0;
+%     elseif contains(fname, 'untreated') || contains(fname, 'Untreated') || contains(fname, 'UNTREATED')
+%         targets_test_h(iter_data) = 1;
+%     else
+%         error('No hour found')
+%     end
+% end
+idx_del = find(lines_test_pdtest == 0);
+lines_test_pdtest(idx_del) = [];
+feats_test_pdtest(idx_del,:) = [];
+paths_test_pdtest(idx_del,:) = [];
+targets_test_pdtest(idx_del,:) = [];
+scores_test_pdtest(idx_del,:) = [];
+preds_test_pdtest(idx_del,:) = [];
+targets_test_h_pdtest = inf*ones(size(targets_test_pdtest));
+
+
+
+feats_all = [feats_test_cltrain;
+    feats_test_clvalid;
+    feats_test_cltest;
+    feats_test_pdtest];
+
+targets_h_all = [targets_test_h_cltrain;
+    targets_test_h_clvalid;
+    targets_test_h_cltest;
+    targets_test_h_pdtest];
+
+lines_all = [lines_test_cltrain;
+    lines_test_clvalid;
+    lines_test_cltest;
+    lines_test_pdtest];
+
+
+
+%%
+tsnes_all = tsne(feats_all, 'Perplexity', 50, 'Standardize',true,'LearnRate',100);
+%%
+close all
+h_f1 = figure(1);
+
+hold on,set(h_f1,'Color',[0.8, 0.8, 0.8]);
+for idx_data = 1:size(tsnes_all,1)
+    if lines_all(idx_data,1) == 1
+        col_plot = [1 1 0];
+%         figure(101), hold on
+    elseif lines_all(idx_data,1) == 2
+        col_plot = [0 1 1];
+%         figure(102), hold on
+    elseif lines_all(idx_data,1) == 3
+        col_plot = [1 0 1];
+%         figure(103), hold on
+    else
+        continue
+    end
+
+    if targets_h_all(idx_data,1) == 1
+        mar_plot = 'o';
+        mar_size = 10;
+    elseif targets_h_all(idx_data,1) == 0
+        mar_plot = '^';
+        mar_size = 10;
+    elseif targets_h_all(idx_data,1) == -1
+        mar_plot = 'x';
+        mar_size = 10;
+    else
+        mar_plot = '.';
+        mar_size = 15;
+    end
+
+    plot(tsnes_all(idx_data,1),tsnes_all(idx_data,2),...
+        mar_plot,'Color',col_plot, 'MarkerSize',mar_size)
+
+    ylim([min(tsnes_all(:,2)) max(tsnes_all(:,2))])
+    xlim([min(tsnes_all(:,1)) max(tsnes_all(:,1))])
+    axis image
+    axis off
+end
+
+
+h_f2 = figure(2);
+hold on,set(h_f2,'Color',[0.8, 0.8, 0.8]);
+for idx_data = 1:size(tsnes_all,1)
+    if lines_all(idx_data,1) == 200
+        col_plot = [1 0 0];
+%         figure(203), hold on
+    elseif lines_all(idx_data,1) == 100
+        col_plot = [0.75 0.25 0];
+%         figure(204), hold on
+    else
+        continue
+    end
+
+    if targets_h_all(idx_data,1) == 1
+        mar_plot = 'o';
+        mar_size = 10;
+    elseif targets_h_all(idx_data,1) == 0
+        mar_plot = '^';
+        mar_size = 10;
+    elseif targets_h_all(idx_data,1) == -1
+        mar_plot = 'x';
+        mar_size = 10;
+    else
+        mar_plot = '.';
+        mar_size = 15;
+    end
+
+    plot(tsnes_all(idx_data,1),tsnes_all(idx_data,2),...
+        mar_plot,'Color',col_plot, 'MarkerSize',mar_size)
+
+    ylim([min(tsnes_all(:,2)) max(tsnes_all(:,2))])
+    xlim([min(tsnes_all(:,1)) max(tsnes_all(:,1))])
+    axis image
+    axis off
+end
+
+
+
+h_f3 = figure(3);
+hold on,set(h_f3,'Color',[0.8, 0.8, 0.8]);
+for idx_data = 1:size(tsnes_all,1)
+    if lines_all(idx_data,1) == 300
+        col_plot = [0 0 1];
+%         figure(201), hold on
+    elseif lines_all(idx_data,1) == 400
+        col_plot = [0.3333 0.3333 01];
+%         figure(202), hold on
+    else
+        continue
+    end
+
+    if targets_h_all(idx_data,1) == 1
+        mar_plot = 'o';
+        mar_size = 10;
+    elseif targets_h_all(idx_data,1) == 0
+        mar_plot = '^';
+        mar_size = 10;
+    elseif targets_h_all(idx_data,1) == -1
+        mar_plot = 'x';
+        mar_size = 10;
+    else
+        mar_plot = '.';
+        mar_size = 15;
+    end
+
+    plot(tsnes_all(idx_data,1),tsnes_all(idx_data,2),...
+        mar_plot,'Color',col_plot, 'MarkerSize',mar_size)
+
+    ylim([min(tsnes_all(:,2)) max(tsnes_all(:,2))])
+    xlim([min(tsnes_all(:,1)) max(tsnes_all(:,1))])
+    axis image
+    axis off
+end
+
+h_f10 = figure(10);
+
+hold on,set(h_f10,'Color',[0.8, 0.8, 0.8]);
+for idx_data = 1:size(tsnes_all,1)
+    if lines_all(idx_data,1) == 1
+        col_plot = [1 1 0];
+%         figure(101), hold on
+    elseif lines_all(idx_data,1) == 2
+        col_plot = [0 1 1];
+%         figure(102), hold on
+    elseif lines_all(idx_data,1) == 3
+        col_plot = [1 0 1];
+%         figure(103), hold on
+    elseif lines_all(idx_data,1) == 300
+        col_plot = [0 0 1];
+%         figure(201), hold on
+    elseif lines_all(idx_data,1) == 400
+        col_plot = [0.3333 0.3333 01];
+%         figure(202), hold on
+    elseif lines_all(idx_data,1) == 200
+        col_plot = [1 0 0];
+%         figure(203), hold on
+    elseif lines_all(idx_data,1) == 100
+        col_plot = [1.0 0.3333 0.3333];
+%         figure(204), hold on
+    else
+        continue
+    end
+
+    if targets_h_all(idx_data,1) == 1
+        mar_plot = 'o';
+        mar_size = 10;
+    elseif targets_h_all(idx_data,1) == 0
+        mar_plot = '^';
+        mar_size = 10;
+    elseif targets_h_all(idx_data,1) == -1
+        mar_plot = 'x';
+        mar_size = 10;
+    else
+        mar_plot = '.';
+        mar_size = 15;
+    end
+
+    plot(tsnes_all(idx_data,1),tsnes_all(idx_data,2),...
+        mar_plot,'Color',col_plot, 'MarkerSize',mar_size)
+
+    ylim([min(tsnes_all(:,2)) max(tsnes_all(:,2))])
+    xlim([min(tsnes_all(:,1)) max(tsnes_all(:,1))])
+    axis image
+    axis off
+end
+
+saveas(h_f1, 't-sne.tiff')
+saveas(h_f2, 't-sne_PDbad.tiff')
+saveas(h_f3, 't-sne_PDgood.tiff')
+saveas(h_f10, 't-sne_all.tiff')
+

@@ -1,0 +1,3 @@
+filename,train,val,test
+good_ipsc,551,66,66
+bad_psc,414,49,2896

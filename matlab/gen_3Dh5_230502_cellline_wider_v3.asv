@@ -1,0 +1,230 @@
+% check size
+% dataset division is 8:1:1
+% for processing standard colony data (230323 + 230407)
+% v2 difference: center-prioritizing crop to be curated (+0306 margin 15->20 fixed)
+% v3 difference: doesn't resample the image for efficiency & integrity
+clear
+clc
+close all
+
+
+addpath('/data01/gkim/Matlab_subcodes/gk')
+addpath('/data01/gkim/Matlab_subcodes')
+
+dir_source = '/data02/gkim/stem_cell_jwshin/data/230511_TCF'; 
+dir_save = '/data02/gkim/stem_cell_jwshin/data/230511_3DH5_wider_v3'; 
+dir_img = '/data02/gkim/stem_cell_jwshin/data/230511_3DPNG_wider_v3';
+
+cd(dir_source)
+dir_set = dir('0*');
+h_ = figure(1);
+h_.Position = [0 0 1920 1080];
+h_.Color = [1 1 1];
+
+hours = 0;%0:1:24;
+
+for hour = hours
+
+for iter_set = length(dir_set):-1:1
+    cd(dir_source)
+    cd(dir_set(iter_set).name)
+    dir_cls = dir('*_untreated*');
+
+    for iter_cls = 1:length(dir_cls)%1:length(dir_cls)
+        
+        cd(dir_source)
+        cd(dir_set(iter_set).name)
+        cd(dir_cls(iter_cls).name)
+        dir_mat = dir('23*');
+        for iter_stitch = length(dir_mat):-1:1
+            
+            iter_x = 0;
+            iter_y = 0;
+
+            cd(dir_source)
+            cd(dir_set(iter_set).name)
+            cd(dir_cls(iter_cls).name)
+            cd(dir_mat(iter_stitch).name);
+
+            dir_tcf = dir('*.TCF');
+
+            if length(dir_tcf) == 0 
+                continue
+            end
+            
+            mkdir([dir_save, '/',...
+            	dir_set(iter_set).name, '/',...
+            	dir_cls(iter_cls).name]);%, sprintf('_hr%02d', hour)]);
+            
+            mkdir([dir_img, '/',...
+            	dir_set(iter_set).name, '/',...
+            	dir_cls(iter_cls).name]);%, sprintf('_hr%02d', hour)]);
+            
+            fname = dir_tcf(1).name;
+            idx_dot = strfind(fname, '.');
+            fname_save = fname(1:idx_dot(end)-1);
+            %% comment this if you're fixing the data for the above condition
+            if exist([dir_img, '/', dir_set(iter_set).name, '/',...
+                dir_cls(iter_cls).name, sprintf('_hr%02d', hour), '/', '00_colony_' fname_save, '.png'])
+                'skipping... colony data already exist'
+                continue
+            end
+            if exist([dir_save, '/', dir_set(iter_set).name, '/',...
+                dir_cls(iter_cls).name, '/',fname_save,'.h5'])
+                'skipping... colony data already exist'
+                continue
+            end
+            %%
+
+            info_temp = h5info(fname, '/Info/Device');
+            n_m = uint16(info_temp.Attributes(3).Value*10000);
+%             tomo_stitch = h5read(fname, sprintf('/Data/3D/%06d', hour));
+            
+            info_temp = h5info(fname, '/Data/3D');         
+            size_ori = [info_temp.Attributes(7).Value info_temp.Attributes(8).Value info_temp.Attributes(9).Value];
+            res_ori = [info_temp.Attributes(2).Value info_temp.Attributes(3).Value info_temp.Attributes(4).Value];
+
+            info_temp = h5info(fname, '/Info/Device');
+            n_m = uint16(info_temp.Attributes(3).Value*10000);
+
+            idx_slash = strfind(dir_source,'/');
+            idx_slash = idx_slash(end);
+            if str2num(dir_source(idx_slash+1:idx_slash+6)) < 230701
+                tomo_stitch = h5read(fname, sprintf('/Data/3D/%06d', hour));
+                tomo_stitch(tomo_stitch == 0) = n_m; 
+            else
+                tomo_stitch = ReadLDMTCFHT(fname, hour);
+                tomo_stitch = single(tomo_stitch*10000);
+                tomo_stitch = permute(tomo_stitch, [2 1 3]);
+                tomo_stitch(tomo_stitch == 0) = n_m; 
+            end
+            info_temp = h5info(fname, '/Data/3D');         
+            size_ori = [info_temp.Attributes(7).Value info_temp.Attributes(8).Value info_temp.Attributes(9).Value];
+            res_ori = [info_temp.Attributes(2).Value info_temp.Attributes(3).Value info_temp.Attributes(4).Value];
+ 
+            size_patch = [384 384 32];
+
+            mipx_stitch = squeeze(max(tomo_stitch, [],1));
+            mipz_stitch = max(tomo_stitch, [],3);
+
+            n_thres = 13420; %13370
+            %% dtermin z crop range
+            count_z = sum(single(mipx_stitch),1);
+            z_glass = gradient(count_z);
+            z_glass = find(z_glass == max(z_glass));
+            z_crop_min = min(z_glass - 4, size_ori(3)-48+1);
+            z_crop_max = z_crop_min+48-1;
+            z_crop_ = [z_crop_min z_crop_max];
+
+            se = strel('disk', round(1/res_ori(1)));
+            mip_stitch = max(tomo_stitch,[],3);
+            mask_stitch = mip_stitch > n_thres;
+            mask_stitch = imdilate(mask_stitch,se);
+            mask_stitch = imfill(mask_stitch,'holes');
+            mask_stitch = imerode(mask_stitch,se);
+            [lbl,num] = bwlabeln(mask_stitch, 4);
+            if mask_stitch(round(end/2),round(end/2)) ~= 0 && sum(sum(lbl == mask_stitch(round(end/2),round(end/2))))*res_ori(1)^2>100*100
+                lbl_colony = lbl(round(end/2),round(end/2));
+            else
+                pixels_lbl = [];
+                for idx_mask = 1:num
+                    pixels_lbl = [pixels_lbl sum(sum(lbl == idx_mask))];
+                end
+                lbl_colony = find(pixels_lbl == max(pixels_lbl));
+            end
+            mask_stitch = (lbl==lbl_colony);
+            mask_stitch = imfill(mask_stitch,'holes');
+            
+            %% determin x crop range
+            x_crop_ = find(sum(mask_stitch,2)>0);
+            x_num_patch = ceil((max(x_crop_)-min(x_crop_)+1)/size_patch(1));
+            patch_good = false;
+            while ~patch_good
+                if max(x_crop_) == size_ori(1)
+                    x_crop_max = size_ori(1);
+                    x_crop_min = x_crop_max-x_num_patch*size_patch(1)+1;
+                elseif min(x_crop_) == 1
+                    x_crop_min = 1;
+                    x_crop_max = x_crop_min+x_num_patch*size_patch(1)-1;
+                else
+                    x_center = floor((max(x_crop_)+min(x_crop_))/2+1/2);
+                    x_crop_max = x_center+floor(x_num_patch*size_patch(1)/2-1/2);
+                    x_crop_min = x_center-ceil(x_num_patch*size_patch(1)/2-1/2);
+                end
+
+                if x_crop_min < 1
+                    x_num_patch = x_num_patch-1;
+                elseif x_crop_max > size_ori(1)
+                    x_num_patch = x_num_patch-1;
+                else
+                    patch_good = true;
+                end
+            end
+            x_crop_ = [x_crop_min x_crop_max];
+            %% determin y crop range
+            y_crop_ = find(sum(mask_stitch,1)>0);
+            y_num_patch = ceil((max(y_crop_)-min(y_crop_)+1)/size_patch(2));
+            patch_good = false;
+            while ~patch_good
+                if max(y_crop_) == size_ori(2)
+                    y_crop_max = size_ori(2);
+                    y_crop_min = y_crop_max-y_num_patch*size_patch(2)+1;
+                elseif min(y_crop_) == 1
+                    y_crop_min = 1;
+                    y_crop_max = y_crop_min+y_num_patch*size_patch(2)-1;
+                else
+                    y_center = floor((max(y_crop_)+min(y_crop_))/2+1/2);
+                    y_crop_max = y_center+floor(y_num_patch*size_patch(1)/2-1/2);
+                    y_crop_min = y_center-ceil(y_num_patch*size_patch(1)/2-1/2);
+                end
+
+                if y_crop_min < 1
+                    y_num_patch = y_num_patch-1;
+                elseif y_crop_max > size_ori(2)
+                    y_num_patch = y_num_patch-1;
+                else
+                    patch_good = true;
+                end
+            end
+            y_crop_ = [y_crop_min y_crop_max];
+
+            tomo_stitch = tomo_stitch(x_crop_(1):x_crop_(2),y_crop_(1):y_crop_(2),z_crop_(1):z_crop_(2));
+            mask_stitch = mask_stitch(x_crop_(1):x_crop_(2),y_crop_(1):y_crop_(2));
+            
+           
+            set(0, 'CurrentFigure', h_), hold off
+            subplot(1,2,1), imagesc(max(tomo_stitch,[],3), [13300 13800]), axis image, colormap gray
+%             subplot(1,2,2), imagesc(mask_stitch, [0 1]), axis image, colormap gray
+            subplot(1,2,2), imagesc(squeeze(max(tomo_stitch,[],1)), [13300 13800]), axis image, colormap gray
+            set(gca,'DataAspectRatio',[1, res_ori(3)/res_ori(2), 1])
+            drawnow
+            pause(0.1)
+
+            cd([dir_save, '/',...
+                dir_set(iter_set).name, '/',...
+                dir_cls(iter_cls).name]);
+
+%             save([fname_save, '.mat'],...%sprintf('_hr%02d.mat', hour)],...
+%                 'data','-v7.3');
+            mask_stitch = uint8(mask_stitch);
+            h5create([fname_save,'.h5'], '/ri', size(tomo_stitch), 'Datatype', 'uint16');
+            h5create([fname_save,'.h5'], '/mask_2D', size(mask_stitch), 'Datatype', 'uint8');
+            h5write([fname_save,'.h5'], '/ri', tomo_stitch);
+            h5write([fname_save,'.h5'], '/mask_2D', mask_stitch);
+            h5writeatt([fname_save,'.h5'], '/', 'x_crop_min', x_crop_(1));
+            h5writeatt([fname_save,'.h5'], '/', 'x_crop_max', x_crop_(2));
+            h5writeatt([fname_save,'.h5'], '/', 'y_crop_min', y_crop_(1));
+            h5writeatt([fname_save,'.h5'], '/', 'y_crop_max', y_crop_(2));
+            h5writeatt([fname_save,'.h5'], '/', 'z_crop_min', z_crop_(1));
+            h5writeatt([fname_save,'.h5'], '/', 'z_crop_max', z_crop_(2));
+
+            cd([dir_img, '/',...
+                dir_set(iter_set).name, '/',...
+                dir_cls(iter_cls).name]);
+            saveas(h_, [fname_save, '.png'])
+        end
+    end
+    
+end
+
+end

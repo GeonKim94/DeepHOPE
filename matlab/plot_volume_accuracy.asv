@@ -1,0 +1,268 @@
+close all
+clear
+clc
+
+
+% 230502_MIPH5_wider_allh_b002_in_lr0.001 (no _2) for allh
+% 230502_MIPH5_wider_12h_b002_in_lr0.001 (no _2) for 12h
+% 230502_MIPH5_wider_24h_b002_in_lr0.001_2 for 24h
+save_fig = false;
+save_png = false;
+str_lineex = {'all'}%{'all', 'noGM', 'noH9', 'noJAX'};
+str_hour = {'all'}% {'12', '24', 'all'};
+cmap_line = [1 1 0; 1 0 1; 0 1 1];
+for iter_lineex = 1:length(str_lineex)
+    for iter_hour = 1:length(str_hour)% 3 to be done later
+        if contains(str_lineex{iter_lineex}, 'no')
+            dir_out = sprintf('/data02/gkim/stem_cell_jwshin/outs/230502_MIPH5_wider_%sh_%s_b002_in_lr0.001',...
+                str_hour{iter_hour}, str_lineex{iter_lineex});
+            dir_out_gen = [dir_out '_' strrep(str_lineex{iter_lineex},'no','test')];
+        else
+            dir_out = sprintf('/data02/gkim/stem_cell_jwshin/outs/230502_MIPH5_wider_%sh_b002_in_lr0.001',...
+                str_hour{iter_hour});%;, str_lineex{iter_lineex});
+            dir_out_gen = 'Nothing';
+        end
+        dir_out_genp = [dir_out sprintf('_test%s', 'PD')];
+        cd(dir_out);
+        list_model = dir('*epoch*]');
+        if length(list_model) == 0
+            continue
+        end
+        epochs = [];
+        accs_tr = [];
+        accs_va = [];
+        accs_te = [];
+        for iter_model = 1:length(list_model)
+            dir_model = list_model(iter_model).name;
+            idxs_lbra = strfind(dir_model,'[');
+            epochs = [epochs; str2num(dir_model(idxs_lbra(1)+1:idxs_lbra(1)+5))];
+            accs_tr = [accs_tr; str2num(dir_model(idxs_lbra(2)+1:idxs_lbra(2)+5))];
+            accs_va = [accs_va; str2num(dir_model(idxs_lbra(3)+1:idxs_lbra(3)+5))];
+            accs_te = [accs_te; str2num(dir_model(idxs_lbra(4)+1:idxs_lbra(4)+5))];
+        end
+        
+        metrics = accs_tr+accs_va;
+        idx_bestmodel = min(find(metrics == max(metrics)));
+        dir_bestmodel = list_model(idx_bestmodel).name;
+            idxs_lbra = strfind(dir_bestmodel,'[');
+        epoch_bestmodel_str = (dir_bestmodel(idxs_lbra(1)+1:idxs_lbra(1)+5));
+        
+        cd(dir_bestmodel)
+        load('result_test.mat');
+        
+        targets = single(targets);
+        test_wholesize = length(paths);
+        scores_test = reshape(scores, [length(scores)/(test_wholesize), test_wholesize])';
+        feats = cell2mat(feats)';
+        feats_test = reshape(feats, [length(feats)/(test_wholesize), test_wholesize])';
+        paths_test = paths';
+        targets_test = single(targets');
+        preds_test = -ones(size(targets_test));
+        for iter_data = 1:length(targets_test)
+            preds_test(iter_data) = find(scores_test(iter_data,:) == max(scores_test(iter_data,:)));
+        end
+        preds_test = preds_test-1;
+        
+        lines_test = zeros(size(targets_test));
+        for iter_data = 1:length(targets_test)
+            fname = paths_test{iter_data};
+            idx_slash = strfind(fname,'/');
+            fname = fname(idx_slash(end)+1:end);
+            if contains(fname, 'GM') || contains(fname, 'gm') || contains(fname, '230719.')  || contains(fname, '230720.') 
+                lines_test(iter_data) = 1;
+            elseif contains(fname, 'H9') || contains(fname, 'h9') || contains(fname, '230714.') 
+                lines_test(iter_data) = 2;
+            elseif contains(fname, 'JAX') || contains(fname, 'Jax') || contains(fname, '230713.') 
+                lines_test(iter_data) = 3;
+            else
+                error('No line found')
+            end
+        end
+        
+        targets_test_h = zeros(size(targets_test));
+        for iter_data = 1:length(targets_test)
+            fname = paths_test{iter_data};
+            idx_slash = strfind(fname,'/');
+            fname = fname(idx_slash(end)+1:end);
+            if contains(fname, '24h') || contains(fname, '24H')
+                targets_test_h(iter_data) = -1;
+            elseif contains(fname, '12h') || contains(fname, '12H')
+                targets_test_h(iter_data) = 0;
+            elseif contains(fname, 'untreated') || contains(fname, 'Untreated') || contains(fname, 'UNTREATED')
+                targets_test_h(iter_data) = 1;
+            else
+                error('No hour found')
+            end
+        end
+        
+
+        idx_corr = find(preds_test == targets_test);
+        idx_inco = find(preds_test ~= targets_test);
+
+        paths_corr = paths_test(idx_corr,:);
+        paths_inco = paths_test(idx_inco,:);
+
+        vols_corr = [];
+        for iter_corr = 1:length(paths_corr)
+            [dir_find,pat_find] = find_similfile(paths_corr{iter_corr},'/data02/gkim/stem_cell_jwshin/data/230502_feature_v4');
+            try
+                load(dir_find, 'vol_colony');
+            catch
+                vol_colony = nan;
+            end
+            vols_corr = [vols_corr; vol_colony];
+        end
+
+        vols_inco = [];
+        for iter_inco = 1:length(paths_inco)
+            [dir_find,pat_find] = find_similfile(paths_inco{iter_inco},'/data02/gkim/stem_cell_jwshin/data/230502_feature_v4');
+            try
+                load(dir_find, 'vol_colony');
+            catch
+                vol_colony = nan;
+            end
+            vols_inco = [vols_inco; vol_colony];
+        end
+
+        figure(1)
+        hold on
+        plot(1+0.05*randn(length(vols_inco),1), vols_inco, 'xk');
+        errorbar(1.25, mean(vols_inco), std(vols_inco,0,1),'k');
+        plot([1.15 1.35], [mean(vols_inco) mean(vols_inco)],'k')
+        plot(2+0.05*randn(length(vols_corr),1), vols_corr, 'ok');
+        errorbar(2.25, mean(vols_corr), std(vols_corr,0,1),'k');
+        plot([2.15 2.35], [mean(vols_corr) mean(vols_corr)],'k')
+        xlim([0.25 3.25])
+     
+      
+        %%
+        if ~exist(dir_out_genp)
+        else
+        cd(dir_out_genp)
+        list_model = dir(['epoch[' epoch_bestmodel_str '*]']);
+        dir_bestmodel_genp = list_model(1).name;
+        cd(dir_bestmodel_genp)
+        
+        load('result_test.mat');
+        
+        targets = single(targets);
+        test_wholesize = length(paths);
+        scores_test = reshape(scores, [length(scores)/(test_wholesize), test_wholesize])';
+        feats = cell2mat(feats)';
+        feats_test = reshape(feats, [length(feats)/(test_wholesize), test_wholesize])';
+        paths_test = paths';
+        targets_test = single(targets');
+        preds_test = -ones(size(targets_test));
+        for iter_data = 1:length(targets_test)
+            preds_test(iter_data) = find(scores_test(iter_data,:) == max(scores_test(iter_data,:)));
+        end
+        preds_test = preds_test-1;
+        
+        lines_test = zeros(size(targets_test));
+        for iter_data = 1:length(targets_test)
+            fname = paths_test{iter_data};
+            idx_slash = strfind(fname,'/');
+            fname = fname(idx_slash(end)+1:end);
+            if contains(fname, '.A20.') || contains(fname, 'A20_')
+                lines_test(iter_data) = 1;
+            elseif contains(fname, '.A19.') || contains(fname, 'A19_')
+                lines_test(iter_data) = 2;
+            elseif contains(fname, '.A15.') || contains(fname, 'A15_')
+                continue%lines_test(iter_data) = 3;
+        
+            elseif contains(fname, '.E5.') || contains(fname, 'E5_')
+                continue%lines_test(iter_data) = 4;
+            elseif contains(fname, '.E3.') || contains(fname, 'E3_')
+                continue%lines_test(iter_data) = 5;
+        
+            elseif contains(fname, '.A4.') || contains(fname, 'A4_')
+                continue%lines_test(iter_data) = 6;
+            elseif contains(fname, '.A2.') || contains(fname, 'A2_')
+                lines_test(iter_data) = 3;%7;
+            elseif contains(fname, '.A12.') || contains(fname, 'A12_')
+                lines_test(iter_data) = 4;%8;
+            else
+                error('No line found')
+            end
+        end
+        
+        % targets_test_h = zeros(size(targets_test));
+        % for iter_data = 1:length(targets_test)
+        %     fname = paths_test{iter_data};
+        %     idx_slash = strfind(fname,'/');
+        %     fname = fname(idx_slash(end)+1:end);
+        %     if contains(fname, '24h') || contains(fname, '24H')
+        %         targets_test_h(iter_data) = -1;
+        %     elseif contains(fname, '12h') || contains(fname, '12H')
+        %         targets_test_h(iter_data) = 0;
+        %     elseif contains(fname, 'untreated') || contains(fname, 'Untreated') || contains(fname, 'UNTREATED')
+        %         targets_test_h(iter_data) = 1;
+        %     else
+        %         error('No hour found')
+        %     end
+        % end
+        idx_del = find(lines_test == 0);
+        lines_test(idx_del) = [];
+        feats_test(idx_del,:) = [];
+        paths_test(idx_del,:) = [];
+        targets_test(idx_del,:) = [];
+        scores_test(idx_del,:) = [];
+        preds_test(idx_del,:) = [];
+        
+        
+        idx_corr = find(preds_test == targets_test);
+        idx_inco = find(preds_test ~= targets_test);
+
+        paths_corr = paths_test(idx_corr,:);
+        paths_inco = paths_test(idx_inco,:);
+        lines_corr = lines_test(idx_corr,:);
+        lines_inco = lines_test(idx_inco,:);
+
+        vols_corr = [];
+        for iter_corr = 1:length(paths_corr)
+            [dir_find,pat_find] = find_similfile(paths_corr{iter_corr},'/data02/gkim/stem_cell_jwshin/data/230306_feature_v4');
+            try
+                load(dir_find, 'vol_colony');
+            catch
+                vol_colony = nan;
+            end
+            vols_corr = [vols_corr; vol_colony];
+        end
+
+        vols_inco = [];
+        for iter_inco = 1:length(paths_inco)
+            [dir_find,pat_find] = find_similfile(paths_inco{iter_inco},'/data02/gkim/stem_cell_jwshin/data/230306_feature_v4');
+            try
+                load(dir_find, 'vol_colony');
+            catch
+                vol_colony = nan;
+            end
+            vols_inco = [vols_inco; vol_colony];
+        end
+
+        figure(2)
+        set(gcf, 'Position', [0 0 750 750]);
+        set(gcf, 'Color', [1 1 1])
+        hold on
+        cols_plot = {[0, 0, 1], [0.25, 0, 0.75], [1, 0, 0], [0.75, 0.25, 0]};
+        for iter_inco = 1:length(vols_inco)
+            scatter(1+0.05*randn, vols_inco(iter_inco),...
+                50,cols_plot{lines_inco(iter_inco)},'o','MarkerFaceColor',cols_plot{lines_inco(iter_inco)},'MarkerFaceAlpha',0.25)%, 'MarkerSize', 10);
+        end
+        errorbar(1.25, mean(vols_inco), std(vols_inco,0,1),'k', 'CapSize',20);
+        plot([1.15 1.35], [mean(vols_inco) mean(vols_inco)],'k')
+        
+
+        for iter_corr = 1:length(vols_corr)
+            scatter(2+0.05*randn, vols_corr(iter_corr),...
+                50,cols_plot{lines_corr(iter_corr)},'o','MarkerFaceColor',cols_plot{lines_corr(iter_corr)},'MarkerFaceAlpha',0.25)%, 'MarkerSize', 10);
+        end
+        errorbar(2.25, mean(vols_corr), std(vols_corr,0,1),'k', 'CapSize',20);
+        plot([2.15 2.35], [mean(vols_corr) mean(vols_corr)],'k')
+        xlim([0.5 2.75])
+        ylim([0 6*10^5])
+        set(gca,'xtick',[])
+        end
+     
+    end
+end
