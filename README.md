@@ -72,11 +72,11 @@ optim:
 
 # Model
 model:
-  type: "resnet" #
-  ch_in: 12
+  type: "mresnet" #
+  ch_in: 16
   num_classes: 2
-  dir_ckpt: "/data03/gkim/stem_cell_jwshin/outs/24_SEC1H5_patch_v4_allh_GMGL13_keep1_resnetp34bam_bin_lossbal"
-  fname_ckpt: "epoch[00079]_tr[0.949]_va[0.936]_te[0.931]_trW[0.954]_vaW[0.945]_teW[0.936].pth.tar"
+  dir_ckpt: "/ckpts/mresnetpg34_ft128x2_gap_bottleneck_bam/"
+  fname_ckpt: "epoch[00181]_tr[0.970]_va[0.953]_te[0.941]_trW[0.973]_vaW[0.937]_teW[0.934].pth.tar"
   aug_arch:
     ch_ft: 128
     growth_rate: 2
