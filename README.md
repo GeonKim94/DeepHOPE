@@ -103,22 +103,22 @@ epoch: number of iterations over the entire dataset, which the training proceeds
 optimizer_type: type of gradient-based neural network parameter optimizer  
 scheduler_type: type of learning rate schedulers for the optimizer  
 
-ch_in: number of input channels (number of used vertical stacks in our case)
-dir_ckpt: the directory where neural network checkpoints, including the network parameters, will be saved
-fname_ckpt: the name of checkpoint file to load, when inferring or resuming training
-ch_ft: number of feature map channels after the initial convolution
-growth_rate: ratio of feature map increase between neighboring ResNet stages
-block: ResNet block structure - "Bottleneck" 
-layers: a list containing the block counts of four ResNet stages
-att_type: type of attention mechanism - "BAM", "CBAM", "SA" available & not applied if not specified
-gap: boolean for using global average pooling
+ch_in: number of input channels (number of used vertical stacks in our case)  
+dir_ckpt: the directory where neural network checkpoints, including the network parameters, will be saved  
+fname_ckpt: the name of checkpoint file to load, when inferring or resuming training  
+ch_ft: number of feature map channels after the initial convolution  
+growth_rate: ratio of feature map increase between neighboring ResNet stages  
+block: ResNet block structure - "Bottleneck"   
+layers: a list containing the block counts of four ResNet stages  
+att_type: type of attention mechanism - "BAM", "CBAM", "SA" available & not applied if not specified  
+gap: boolean for using global average pooling   
 
 
-dir_data: the directory that contains train, val, or test data (each file is a 3D HT patch) 
-dir_infer: the directory to save the inference result
-size_xy: horizontal patch size (number of pixels)
-size_z: vertical patch size (number of pixels)
-reset_class: boolean for resetting the class annotation (True required for inference)
+dir_data: the directory that contains train, val, or test data (each file is a 3D HT patch)   
+dir_infer: the directory to save the inference result  
+size_xy: horizontal patch size (number of pixels)  
+size_z: vertical patch size (number of pixels)  
+reset_class: boolean for resetting the class annotation (True required for inference)  
   
 ## Run the code for training
 
