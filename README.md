@@ -1,6 +1,6 @@
 # DeepHOPE (deep-learning-assisted holotomography for pluripotency evaluation)
 This repository contains codes, models, and data for demonstrating DeepHOPE, which is an integrated pipeline of holotmographic imaging and deep-learning image recognition for assessing the stemness of an hPSC colony. 
-
+![Description](./image/rm_movie.gif)
 ## Demo config, model and data
 Config: [google drive link](https://drive.google.com/drive/folders/1Wb3pn2wLnlkKAOuaRPOMSqsdJi6oDVvZ?usp=sharing)
 Pre-trained model (trained using the cofing file args_train.yaml) : [google drive link](https://drive.google.com/drive/folders/1KDaMQe6ZQ3eN0REY7Q4fb-ijQ0S5MHzd?usp=sharing)   
