@@ -2,8 +2,9 @@
 This repository contains codes, models, and data for demonstrating DeepHOPE, which is an integrated pipeline of holotmographic imaging and deep-learning image recognition for assessing the stemness of an hPSC colony. 
 
 ## Demo model and data
-Pre-trained model : WIP  
-Example inference data : WIP  
+Pre-trained model: [google drive link](https://drive.google.com/drive/folders/1KDaMQe6ZQ3eN0REY7Q4fb-ijQ0S5MHzd?usp=sharing)   
+Example data: [google drive link](https://drive.google.com/drive/folders/1JV4vVBrRpGPSXsaQavx2FNHvBRPUVu8k?usp=sharing)   
+Example yaml (won't work; just see for the format): [google drive link](https://drive.google.com/drive/folders/1MH0YmaA8YaoTEM29SHzHMIRif8boWSr3?usp=sharing)   
 
 ## Environment
 ```shell
@@ -15,12 +16,32 @@ conda activate env_DeepHOPE
 ``` 
 
 ## Data directory example
-
+One can explicitely use the directory structure below or use yaml files (i.e., data_train.yaml, data_val.yaml, data_test.yaml; example is provided) that contain the file paths and classes
 ```shell
 
-data_test.yaml
+train               
+ ├──  group1     
+ |      ├── colony01_patch01.h5     
+ |      ├── colony01_patch02.h5     
+ |      ├── ...
+ └──  group2     
+ |      ├── colony01_patch01.h5     
+ |      ├── colony01_patch02.h5     
+ |      ├── ...
+ ├── ...
 
-dataset                
+val              
+ ├──  group1     
+ |      ├── colony01_patch01.h5     
+ |      ├── colony01_patch02.h5     
+ |      ├── ...
+ └──  group2     
+ |      ├── colony01_patch01.h5     
+ |      ├── colony01_patch02.h5     
+ |      ├── ...
+ ├── ...
+
+test               
  ├──  group1     
  |      ├── colony01_patch01.h5     
  |      ├── colony01_patch02.h5     
@@ -32,7 +53,6 @@ dataset
  ├── ...
 
 ```
-The yaml file can be in any directory
 
 ## Training the neural network
 
@@ -101,7 +121,7 @@ data:
 
 ```
 gpus: the id of GPU devices to use to compute deep neural networks and related gradients  
-cpus: the number of CPU workers for torch DataLoader objects in the execution.  
+cpus: the number of CPU workers for DataLoaders.  
 
 loss: string patterns that indicate which type of classification loss to utilize  
 batch_size: number of patch data to perform each inference or gradient calculation   
@@ -124,7 +144,7 @@ dir_data: the directory that contains train, val, or test data (each file is a 3
 dir_infer: the directory to save the inference result  
 size_xy: horizontal patch size (number of pixels)  
 size_z: vertical patch size (number of pixels)  
-reset_class: boolean for resetting the class annotation (True required for inference)  
+reset_class: boolean for resetting the class annotation (true required for most inference)  
   
 ## License
 This project is open-sourced under the MIT license.
