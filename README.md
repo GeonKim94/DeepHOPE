@@ -42,7 +42,7 @@ python3 train.py --config "path to your config file"
 
 ```
 
-## Utilizing the neural network
+## Inference with the trained neural network
 
 ```shell
 
@@ -51,7 +51,7 @@ python3 infer.py --config "path to your config file"
 ```
 
 
-## Edit the config file to
+## Editting the config file
 A config file is a yaml file of the following format, that governs the process of either training (train.py) or inference (infer.py).  
 ``` shell
 
