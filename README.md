@@ -3,7 +3,7 @@ This repository contains codes, models, and data for demonstrating DeepHOPE, whi
 
 ## Demo model and data
 Pre-trained model: [google drive link](https://drive.google.com/drive/folders/1KDaMQe6ZQ3eN0REY7Q4fb-ijQ0S5MHzd?usp=sharing)   
-Example data: [google drive link](https://drive.google.com/drive/folders/1JV4vVBrRpGPSXsaQavx2FNHvBRPUVu8k?usp=sharing)   
+Example data (iPSC colonies for inference): [google drive link](https://drive.google.com/drive/folders/1JV4vVBrRpGPSXsaQavx2FNHvBRPUVu8k?usp=sharing)   
 Example yaml (won't work; just see for the format): [google drive link](https://drive.google.com/drive/folders/1MH0YmaA8YaoTEM29SHzHMIRif8boWSr3?usp=sharing)   
 
 ## Environment
