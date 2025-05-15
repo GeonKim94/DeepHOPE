@@ -146,6 +146,9 @@ dir_infer: the directory to save the inference result
 size_xy: horizontal patch size (number of pixels)  
 size_z: vertical patch size (number of pixels)  
 reset_class: boolean for resetting the class annotation (true required for most inference)  
+
+## Visualizing the result  
+Run visualize_result_wide.m after modifying the path settings 
   
 ## License
 This project is open-sourced under the MIT license.
