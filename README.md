@@ -110,15 +110,15 @@ model:
     block: "Bottleneck"
     layers: [3,4,6,3]
     att_type: "BAM"
-    gap: False
+    gap: True
 
 # Dataset
 data:
-  dir_data: "/workspace03/gkim/stem_cell_jwshin/data/24_c0512_p0512_SEC1H5_wider_v4_testICCall_RS/"
-  dir_infer: "/data03/gkim/stem_cell_jwshin/outs/24_SEC1H5_patch_v4_allh_GMGL13_keep1_resnetp34bam_bin_lossbal/infer"
+  dir_data: "/data_patch/iPSC"
+  dir_infer: "/infer_patch/iPSC"
   size_xy: 512
-  size_z: 12
-  reset_class: False
+  size_z: 16
+  reset_class: True
 
 ```
 gpus: the id of GPU devices to use to compute deep neural networks and related gradients  
