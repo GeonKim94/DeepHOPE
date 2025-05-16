@@ -21,6 +21,7 @@ def readimg(path_):
     elif ext_path_ == '.h5':
         file_data = h5py.File(path_,'r')
         data_ = np.array(file_data.get('/ri'))
+        data_ = rearrange(data_, "h w c -> c w h")
     else:
         ValueError(f'Image file extension "{ext_path_}" is not supported')
     return np.array(data_).astype('float16')
