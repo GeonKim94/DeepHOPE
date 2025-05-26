@@ -13,7 +13,7 @@ def clip(img, ri=None):
     else:
         cap_min = 13300 if np.max(img) > 10000 else 1.3300
         cap_max = 14000 if np.max(img) > 10000 else 1.4000
-    img = np.clip((img.astype('float' - cap_min) / (cap_max - cap_min), 0, 1)
+    img = np.clip((img.astype('float') - cap_min) / (cap_max - cap_min), 0, 1)
     return img
 
 
