@@ -140,6 +140,7 @@ class runner_imgcls():
         self.net.train()
         for i, (input_b, target_b, _) in enumerate(loader):
             input_b, target_b = input_b.to(self.device), target_b.to(self.device)
+            self.optim.zero_grad()
             output_b = self.net(input_b)
             loss_b = self.loss(output_b,target_b)
             loss_b.backward()
